@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
-    <link rel="stylesheet" href="CSS/index.css" />
-  </head>
-  <body>
-    <div class="game-container">
-      <canvas id="game-canvas"></canvas>
-      <div class="score-container">
-        <span id="score-label">Score:</span>
-        <span id="score">0</span>
-        <span id="high-score-label">High Score:</span>
-        <span id="high-score">0</span>
-      </div>
-      <div class="game-over-container" id="game-over-container">
-        <div class="game-over-text">Game Over</div>
-        <button class="restart-button" id="restart-button">Restart</button>
-      </div>
+<head>
+  <title>Snake Game</title>
+  <link rel="stylesheet" href="CSS/index.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+  <div class="game-container">
+    <canvas id="game-canvas" width="460" height="460"></canvas>
+    <div class="score-container">
+      <span id="score-label">Score:</span>
+      <span id="score">0</span>
+      <span id="high-score-label">High Score:</span>
+      <span id="high-score">0</span>
     </div>
-    <script src="JS/index.js"></script>
-  </body>
+    <div class="game-over-container" id="game-over-container">
+      <div class="game-over-text">Game Over</div>
+      <button class="restart-button" id="restart-button">Restart</button>
+    </div>
+  </div>
+  <script src="JS/index.js"></script>
+</body>
 </html>

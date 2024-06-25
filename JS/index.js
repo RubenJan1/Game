@@ -16,6 +16,12 @@ var touchStartY = null;
 // Resize canvas to be responsive
 window.addEventListener('resize', resizeCanvas);
 
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientWidth;
+  drawCanvas();
+}
+
 // Initial setup
 initGame();
 
@@ -66,14 +72,14 @@ function moveSnake() {
 
   // Check if the snake hit itself
   for (var i = 1; i < snake.length; i++) {
-    if (head.x == snake[i].x && head.y == snake[i].y) {
+    if (head.x === snake[i].x && head.y === snake[i].y) {
       gameOver();
       return;
     }
   }
 
   // Check if the snake ate the food
-  if (head.x == food.x && head.y == food.y) {
+  if (head.x === food.x && head.y === food.y) {
     snake.push({ x: 0, y: 0 });
     score++;
     updateScore();
@@ -114,7 +120,7 @@ function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Draw the snake
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "green"; // Voorbeeld: groene slang
   for (var i = 0; i < snake.length; i++) {
     ctx.fillRect(snake[i].x * 10, snake[i].y * 10, 10, 10);
   }
@@ -131,16 +137,34 @@ function gameOver() {
   // Show the game over screen
   gameOverContainer.style.display = "flex";
 
-  // Add event listener to restart button
+  // Add event listeners to restart button and enter key
   restartButton.addEventListener("click", restartGame);
+  document.addEventListener("keydown", function (event) {
+    if (event.keyCode === 13) { // Enter key
+      restartGame();
+    }
+  });
 }
 
 function restartGame() {
   // Reset the game variables
-  initGame();
-
+  direction = "right";
+  newDirection = direction;
+  snake = [{ x: 10, y: 10 }];
+  food = { x: 0, y: 0 };
+  score = 0;
+  
   // Hide the game over screen
   gameOverContainer.style.display = "none";
+  
+  // Update the score
+  updateScore();
+  
+  // Generate the initial food
+  generateFood();
+  
+  // Start the game loop
+  moveSnake();
 }
 
 // Add event listener to the document to listen for arrow key presses
@@ -178,39 +202,32 @@ document.addEventListener("touchstart", function (event) {
 });
 
 document.addEventListener("touchmove", function (event) {
-  if (!touchStartX || !touchStartY) return;
+  if (!touchStartX || !touchStartY) {
+    return;
+  }
 
-  const touch = event.touches[0];
-  const touchEndX = touch.clientX;
-  const touchEndY = touch.clientY;
+  var touchEndX = event.touches[0].clientX;
+  var touchEndY = event.touches[0].clientY;
 
-  const diffX = touchEndX - touchStartX;
-  const diffY = touchEndY - touchStartY;
+  var deltaX = touchEndX - touchStartX;
+  var deltaY = touchEndY - touchStartY;
 
-  if (Math.abs(diffX) > Math.abs(diffY)) {
-    if (diffX > 0 && direction !== "left") {
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Horizontal swipe
+    if (deltaX > 0 && direction !== "left") {
       newDirection = "right";
-    } else if (diffX < 0 && direction !== "right") {
+    } else if (deltaX < 0 && direction !== "right") {
       newDirection = "left";
     }
   } else {
-    if (diffY > 0 && direction !== "up") {
+    // Vertical swipe
+    if (deltaY > 0 && direction !== "up") {
       newDirection = "down";
-    } else if (diffY < 0 && direction !== "down") {
+    } else if (deltaY < 0 && direction !== "down") {
       newDirection = "up";
     }
   }
 
   touchStartX = null;
   touchStartY = null;
-
-  event.preventDefault(); // Prevent the default action (scrolling)
 });
-
-// Disable touch move to prevent scrolling
-document.addEventListener("touchmove", function(event) {
-  event.preventDefault();
-}, { passive: false });
-
-// Start the game
-restartGame();
