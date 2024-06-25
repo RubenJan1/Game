@@ -92,12 +92,12 @@ function moveSnake() {
   drawCanvas();
 
   // Call this function again in 100 milliseconds
-  setTimeout(moveSnake, 115);
+  setTimeout(moveSnake, 100);
 }
 
 function generateFood() {
-  food.x = Math.floor(Math.random() * (canvas.width / 10));
-  food.y = Math.floor(Math.random() * (canvas.height / 10));
+  food.x = Math.floor(Math.random() * ((canvas.width / 10) - 4)) + 2;
+  food.y = Math.floor(Math.random() * ((canvas.height / 10) - 4)) + 2;
 }
 
 function updateScore() {
