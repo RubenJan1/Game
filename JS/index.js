@@ -3,20 +3,46 @@ var canvas = document.getElementById("game-canvas");
 var ctx = canvas.getContext("2d");
 
 // Set up the game variables
-var direction = "right";
-var snake = [{ x: 10, y: 10 }];
-var food = { x: 0, y: 0 };
-var score = 0;
-var highScore = localStorage.getItem("snakeHighScore") || 0;
+var direction, newDirection, snake, food, score, highScore;
 
 // Set up the game over variables
 var gameOverContainer = document.getElementById("game-over-container");
 var restartButton = document.getElementById("restart-button");
 
+// Set up touch event variables
+var touchStartX = null;
+var touchStartY = null;
+
+// Resize canvas to be responsive
+window.addEventListener('resize', resizeCanvas);
+
+// Initial setup
+initGame();
+
+function initGame() {
+  direction = "right";
+  newDirection = direction;
+  snake = [{ x: 10, y: 10 }];
+  food = { x: 0, y: 0 };
+  score = 0;
+  highScore = localStorage.getItem("snakeHighScore") || 0;
+
+  resizeCanvas();
+  updateScore();
+  generateFood();
+  moveSnake();
+}
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientWidth;
+  drawCanvas();
+}
+
 // Set up the game functions
 function moveSnake() {
   var head = { x: snake[0].x, y: snake[0].y };
-  switch (direction) {
+  switch (newDirection) {
     case "left":
       head.x--;
       break;
@@ -30,6 +56,7 @@ function moveSnake() {
       head.y++;
       break;
   }
+  direction = newDirection;
 
   // Check if the snake hit a wall
   if (head.x < 0 || head.x >= canvas.width / 10 || head.y < 0 || head.y >= canvas.height / 10) {
@@ -65,7 +92,7 @@ function moveSnake() {
   drawCanvas();
 
   // Call this function again in 100 milliseconds
-  setTimeout(moveSnake, 100);
+  setTimeout(moveSnake, 115);
 }
 
 function generateFood() {
@@ -110,49 +137,80 @@ function gameOver() {
 
 function restartGame() {
   // Reset the game variables
-  direction = "right";
-  snake = [{ x: 10, y: 10 }];
-  food = { x: 0, y: 0 };
-  score = 0;
-  
+  initGame();
+
   // Hide the game over screen
   gameOverContainer.style.display = "none";
-  
-  // Update the score
-  updateScore();
-  
-  // Generate the initial food
-  generateFood();
-  
-  // Start the game loop
-  moveSnake();
-  }
-  
-  // Add event listener to the document to listen for arrow key presses
-  document.addEventListener("keydown", function (event) {
+}
+
+// Add event listener to the document to listen for arrow key presses
+document.addEventListener("keydown", function (event) {
   switch (event.keyCode) {
-  case 37:
-  if (direction != "right") {
-  direction = "left";
+    case 37:
+      if (direction !== "right") {
+        newDirection = "left";
+      }
+      break;
+    case 38:
+      if (direction !== "down") {
+        newDirection = "up";
+      }
+      break;
+    case 39:
+      if (direction !== "left") {
+        newDirection = "right";
+      }
+      break;
+    case 40:
+      if (direction !== "up") {
+        newDirection = "down";
+      }
+      break;
   }
-  break;
-  case 38:
-  if (direction != "down") {
-  direction = "up";
+  event.preventDefault(); // Prevent the default action (scrolling)
+});
+
+// Add touch event listeners for swipe controls
+document.addEventListener("touchstart", function (event) {
+  const touch = event.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+});
+
+document.addEventListener("touchmove", function (event) {
+  if (!touchStartX || !touchStartY) return;
+
+  const touch = event.touches[0];
+  const touchEndX = touch.clientX;
+  const touchEndY = touch.clientY;
+
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (diffX > 0 && direction !== "left") {
+      newDirection = "right";
+    } else if (diffX < 0 && direction !== "right") {
+      newDirection = "left";
+    }
+  } else {
+    if (diffY > 0 && direction !== "up") {
+      newDirection = "down";
+    } else if (diffY < 0 && direction !== "down") {
+      newDirection = "up";
+    }
   }
-  break;
-  case 39:
-  if (direction != "left") {
-  direction = "right";
-  }
-  break;
-  case 40:
-  if (direction != "up") {
-  direction = "down";
-  }
-  break;
-  }
-  });
-  
-  // Start the game
-  restartGame();
+
+  touchStartX = null;
+  touchStartY = null;
+
+  event.preventDefault(); // Prevent the default action (scrolling)
+});
+
+// Disable touch move to prevent scrolling
+document.addEventListener("touchmove", function(event) {
+  event.preventDefault();
+}, { passive: false });
+
+// Start the game
+restartGame();
